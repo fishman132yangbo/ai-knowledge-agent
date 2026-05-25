@@ -4,8 +4,9 @@ from api.chat_api import router as chat_router
 from api.document_api import router as document_router
 from dotenv import load_dotenv
 import os
+from pathlib import Path
 
-load_dotenv()
+load_dotenv(Path(__file__).resolve().parent / ".env")
 app = FastAPI()
 
 app.add_middleware(

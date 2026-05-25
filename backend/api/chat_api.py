@@ -1,7 +1,8 @@
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from openai import OpenAIError
 from pydantic import BaseModel
-from llm.client import client, model_name
+from llm.client import get_client, get_model_name
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -19,8 +20,14 @@ class ChatResponse(BaseModel):
 @router.post("", response_model=ChatResponse) 
 
 def chat(req: chatRequest):
-    response = client.chat.completions.create(
-        model=model_name,
-        messages=[{"role": "user", "content": req.query}],
-    )
+    try:
+        response = get_client().chat.completions.create(
+            model=get_model_name(),
+            messages=[{"role": "user", "content": req.query}],
+        )
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e)) from e
+    except OpenAIError as e:
+        raise HTTPException(status_code=502, detail="LLM provider request failed") from e
+
     return ChatResponse(answer=f"Echo: {response.choices[0].message.content}",code=200)

@@ -23,5 +23,4 @@ async def save_file(file: UploadFile) -> tuple[str, Path]:
     
     document_dir.mkdir(parents=True, exist_ok=True)
     file_path.write_bytes(content)
-    print(f"Saved file to: {file_path}")
     return document_id, file_path

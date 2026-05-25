@@ -52,8 +52,8 @@ def extract_tables_from_pdf(file_path: Path) -> list[DocumentBlock]:
 
 def extract_images_from_pdf(file_path: Path) -> list[DocumentBlock]:
     blocks:list[DocumentBlock] = []
-    image_dir = Path("extracted_images")
-    image_dir.mkdir(exist_ok=True)
+    image_dir = file_path.parent / "extracted_images"
+    image_dir.mkdir(parents=True, exist_ok=True)
     with open(file_path, "rb") as f:
         pdf_bytes = f.read()
     doc = fitz.open(stream=pdf_bytes, filetype="pdf")

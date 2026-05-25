@@ -1,6 +1,7 @@
 
 
 from pathlib import Path
+import shutil
 
 from fastapi import UploadFile
 from schemas.document import DocumentBlock
@@ -15,7 +16,10 @@ async def process_upload_file(file: UploadFile, file_extension: str) -> tuple[st
     # 这里可以根据文件类型进行不同的处理，例如提取文本、清洗内容等
     # 目前先直接保存文件，后续可以在这里添加更多处理逻辑
     document_id, file_path = await save_file(file)
-        # 其他类型的文件暂时不提取文本块，返回空列表
-    blocks = await process_file(file_path, file_extension)  
-    blocks = clean_document_blocks(blocks)
+    try:
+        blocks = await process_file(file_path, file_extension)
+        blocks = clean_document_blocks(blocks)
+    except Exception as exc:
+        shutil.rmtree(file_path.parent, ignore_errors=True)
+        raise ValueError(f"Failed to process uploaded file: {exc}") from exc
     return document_id, file_path, blocks
