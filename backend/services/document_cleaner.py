@@ -109,21 +109,20 @@ def _detect_repeated_header_footer_lines(blocks:list[DocumentBlock]) -> set[str]
     if page_count < 2:
         return set() 
     
-    candidates: list[str] = []
+    counts: Counter[str] = Counter()
 
     for block in text_blocks:
         lines = [_clean_line(line) for line in _normalize_newlines(block.content).split("\n")]
         edge_lines = (lines[:HEADER_FOOTER_SCAN_LINES] + lines[-HEADER_FOOTER_SCAN_LINES:])
-
+        page_candidates: set[str] = set()
         for line in edge_lines:
             if _is_page_number_line(line):
                 continue
             key = _line_key(line)
             if _is_repeated_line_candidates(key):
-                candidates.append(key)
-    
+                page_candidates.add(key)
+        counts.update(page_candidates)
     threshold = max(2, ceil(page_count * REPEATED_LINE_MIN_RATO))
-    counts = Counter(candidates)
     return set(line for line, count in counts.items() if count >= threshold)
 
 def _normalize_newlines(text: str) -> str:
