@@ -96,7 +96,7 @@ def clean_table_block(table_markdown: str, repeated_lines: set[str]) -> str:
     for line in content.split("\n"):
         if "|" in line:
             cells = [cell.strip() for cell in line.split("|")]
-            lines.append(cells)
+            lines.append("|".join(cells))
         else:
             lines.append(_clean_line(line))    
     
@@ -115,12 +115,12 @@ def _detect_repeated_header_footer_lines(blocks:list[DocumentBlock]) -> set[str]
         lines = [_clean_line(line) for line in _normalize_newlines(block.content).split("\n")]
         edge_lines = (lines[:HEADER_FOOTER_SCAN_LINES] + lines[-HEADER_FOOTER_SCAN_LINES:])
 
-    for line in edge_lines:
-        if _is_page_number_line(line):
-            continue
-        key = _line_key(line)
-        if _is_repeated_line_candidates(key):
-            candidates.append(key)
+        for line in edge_lines:
+            if _is_page_number_line(line):
+                continue
+            key = _line_key(line)
+            if _is_repeated_line_candidates(key):
+                candidates.append(key)
     
     threshold = max(2, ceil(page_count * REPEATED_LINE_MIN_RATO))
     counts = Counter(candidates)
